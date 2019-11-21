@@ -8,35 +8,31 @@
 
 
 double const H_BAR = 6.62607004*pow(10,-34);
+double const H_BAR_SQUARED = pow(H_BAR,2);
 double const EPSILON = 2*pow(10,-2);
 
 
 
-
-double calc_distance(double *position_1, double *position_2);
-
-
-double calc_velocity_i(int *coordinates, double time, int i);
-
-
-double calc_rho();
+int coordinates_to_index(int* coordiantes, int config_dimension, int grid_length);
+void index_to_coordinates(int* coordinates, int index, int config_dimension, int grid_length);
+fit_polynomial(int *x, double *y, double *coeffs);
+double derivative_polynomial(double *coeffs);
 
 
-double calc_potential();
+double calc_distance(double *position_1, double *position_2, int spatial_dimension);
+double calc_rho(int *coordinates, double time, int config_dimension);
+double calc_sqrt_rho(int *coordinates, double time, double *velocities, int config_dimension);
+double calc_rho_times_v(int *coordinates, double time, int config_dimension, int i);
+void calc_velocities(int *coordinates, double time, double *velocities, int config_dimension);
+double calc_velocity_i(int *coordinates, double time, int config_dimension, int i);
+double calc_potential(int *coordinates, int num_particles, int spatial_dimension);
+double calc_quantum_potential(double *mass, int *coordinates, double time, int config_dimension);
+double divergence(double (*f)(int*, double, int, int), int * coordinates, double time, int config_dimension);
+double derivative_i_potential(double (*f)(int*, int, int), int *coordinates, int config_dimension, int num_particles, int spatial_dimension, double epsilon, int index);
+double derivative_i_quantum_potential(double (*f)(double*, int*, double, int), double* mass, int *coordinates, int config_dimension, double time , double epsilon, int index);
+double derivative_i_velocity(double (*f)(int*, double, int, int), int *coordinates, double time, int config_dimension, double epsilon, int index, int j);
+double derivative_i(double (*f)(int*, double, int, int), int *coordinates, double time, int config_dimension, double epsilon, int index);
+double runge_kutta(double (*f)(int*, double, int, int), double time_step);
 
-
-double calc_quantum_potential();
-
-
-double gradient_i(double (*f)(double), double x, int i);
-
-
-double divergence(double (*f)(double), double x);
-
-
-double laplacian(double (*f)(double), double x);
-
-
-double derivative_i(double (*f)(double), double x, int i);
 
 #endif

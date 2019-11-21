@@ -4,14 +4,16 @@
 class Point{
 
 public:
-  void init_point(int config_dimension, int grid_length, int index);
-  void update_velocities(int config_dimension, int num_particles, double *mass, double time_step, double time);
-  void update_rho();
+  void init_point(int config_dimension,double *mass, int grid_length, int num_particles, int spatial_dimension, int index);
 
-  int get_coordinates_i(int i){return coordinates[i];}
-  int get_rho(){return rho;}
+  int* get_coordinates(){return coordinates;}
+  int get_coordinate_i(int i){return coordinates[i];}
+  double get_velocity_i(int i){return velocities[i];}
+  double get_rho(){return rho;}
+  double get_V(){return V;}
+  double get_Q(){return Q;}
 private:
-  double rho, Q, V, *velocities;
+  double rho, rho_old, Q, Q_old, V, V_old, *velocities, *velocities_old;
   int *coordinates;
 };
 

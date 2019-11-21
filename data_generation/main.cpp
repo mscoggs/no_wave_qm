@@ -34,10 +34,4 @@ main(int argc, char *argv[])
   grid.print_grid_info();
   grid.evolve();
 
-/*  for(i =0; i<grid.get_total_points(); i++){
-    Point point = grid.get_point_i(i);
-    printf("\n");
-    for(j =0; j < grid.get_config_dimension(); j++) printf("%i,", point.get_coordinates_i(j));
-
-  }*/
 }

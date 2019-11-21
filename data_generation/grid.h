@@ -8,7 +8,13 @@ class Grid{
 public:
   void init_grid();
   void print_grid_info();
+  void print_start();
+  void print_evolution_info();
+
   void evolve();
+  void step_rho();
+  void step_velocities();
+  void update_Q();
 
   int get_spatial_dimension(){return spatial_dimension;}
   int get_grid_length(){return grid_length;}
