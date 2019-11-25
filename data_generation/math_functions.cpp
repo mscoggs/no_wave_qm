@@ -1,6 +1,6 @@
 #include <math.h>
 #include <iostream>
-#include <string>
+#include <string.h>
 #include <cstring>
 
 #include "math_functions.h"
@@ -8,30 +8,26 @@
 
 
 void index_to_coordinates(int* coordinates, int index, int config_dimension, int grid_length){
-  int i=0, r;
+  int i=0,j, r;
   while(index != 0){
     r = index%grid_length;
     coordinates[i] = r;
-    N = (N-r)/grid_length
+    index = (index-r)/grid_length;
     i++;
   }
-  for(j=i;j<config_dimension;j++){
-    coordinates[j] = 0;
-  }
+  for(j=i;j<config_dimension;j++) coordinates[j] = 0;
 }
 
-int coordinates_to_index(int* coordiantes, int config_dimension, int grid_length){
+int coordinates_to_index(int* coordinates, int config_dimension, int grid_length){
   int i, index;
-  for(i=0;i<config_dimension; i++){
-    index+=coordinates[i]*pow(grid_length, i);
-  }
+  for(i=0;i<config_dimension; i++) index+=coordinates[i]*pow(grid_length, i);
   return  index;
 }
 
 
 
 
-fit_polynomial(int *x, double *y, double *coeffs, int degree){
+void fit_polynomial(int *x, double *y, double *coeffs, int degree){
   int i,j,k, n = degree, N = sizeof(x)/sizeof(int);
   double *sigma_x, *sigma_y, temp, t;
   sigma_x = new double[2*n+1]();
@@ -74,7 +70,7 @@ double derivative_polynomial(double *coeffs, double x_val){
   int i;
   double value = coeffs[1];
   for(i=2; i<sizeof(coeffs)/sizeof(double); i++){
-    value += i*coeefs[i]*pow(x_val,i-1);
+    value += i*coeffs[i]*pow(x_val,i-1);
   }
   return value;
 }
@@ -84,7 +80,7 @@ double second_derivative_polynomial(double *coeffs, double x_val){
   int i;
   double value = coeffs[2];
   for(i=3; i<sizeof(coeffs)/sizeof(double); i++){
-    value += (i-1)*i*coeefs[i]*pow(x_val, i-2);
+    value += (i-1)*i*coeffs[i]*pow(x_val, i-2);
   }
   return value;
 }

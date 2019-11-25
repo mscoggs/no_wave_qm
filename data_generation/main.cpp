@@ -30,8 +30,10 @@ main(int argc, char *argv[])
 {
   int i, j;
 	Grid grid;
+  printf("\n...Initializing Grid...\n\n");
   grid.init_grid();
-  grid.print_grid_info();
+  printf("\n...Evolving System...\n\n");
+
   grid.evolve();
 
 }

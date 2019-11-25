@@ -7,9 +7,8 @@ class Grid{
 
 public:
   void init_grid();
-  void print_grid_info();
-  void print_start();
   void print_evolution_info();
+  void print_load_bar(double progress);
 
   void evolve();
   void step_rho();

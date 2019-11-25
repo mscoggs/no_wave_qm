@@ -10,13 +10,14 @@
 double const H_BAR = 6.62607004*pow(10,-34);
 double const H_BAR_SQUARED = pow(H_BAR,2);
 double const EPSILON = 2*pow(10,-2);
-
+int    const DEGREE_OF_FIT = 1;
 
 
 int coordinates_to_index(int* coordiantes, int config_dimension, int grid_length);
 void index_to_coordinates(int* coordinates, int index, int config_dimension, int grid_length);
-fit_polynomial(int *x, double *y, double *coeffs);
-double derivative_polynomial(double *coeffs);
+void fit_polynomial(int *x, double *y, double *coeffs, int degree);
+double derivative_polynomial(double *coeffs, double x_val);
+double second_derivative_polynomial(double *coeffs, double x_val);
 
 
 double calc_distance(double *position_1, double *position_2, int spatial_dimension);
