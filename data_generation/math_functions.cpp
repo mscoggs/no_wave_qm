@@ -19,8 +19,8 @@ void index_to_coordinates(int* coordinates, int index, int config_dimension, int
 }
 
 int coordinates_to_index(int* coordinates, int config_dimension, int grid_length){
-  int i, index;
-  for(i=0;i<config_dimension; i++) index+=coordinates[i]*pow(grid_length, i);
+  int i, index=0;
+  for(i=0;i<config_dimension; i++) index+=(coordinates[i])*pow(grid_length, i);
   return  index;
 }
 

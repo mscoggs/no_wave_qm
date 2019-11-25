@@ -22,7 +22,7 @@ public:
   void change_velocity_i(int i, double change){velocities[i] += change;}
   void change_rho(double change){rho += change;}
   void change_Q(double change){Q += change;}
-
+  void update_old_values();
 private:
   double rho, rho_old, Q, Q_old, V, V_old, *velocities, *velocities_old;
   int *coordinates;

@@ -14,14 +14,13 @@
 
 void Grid::evolve(){
   int i;
+  Point point_to_evolve;
   while(time < total_time){
       print_evolution_info();
       step_rho();
       //step_velocities();
       //update_Q();
-
-      //old_to_current();
-
+      for(i=0;i<total_points;i++) points[i].update_old_values();
       time += time_step;
     }
 }
@@ -45,7 +44,6 @@ void Grid::step_rho(){
     dpdt = 0;
     point_to_evolve = points[i];
     point_to_evolve.get_coordinates(coords_of_point, config_dimension);
-    for(j=0; j<config_dimension; j++) printf("%i, ", coords_of_point[j]);
 
     for(j=0; j<config_dimension; j++){
 
@@ -55,20 +53,13 @@ void Grid::step_rho(){
       memcpy(coords_above, coords_of_point, sizeof(coords_of_point));
       memcpy(coords_below, coords_of_point, sizeof(coords_of_point));
 
-      if(coords_of_point[j] < grid_length - 1){
+      if(coords_above[j] < grid_length - 1){
         x[2] =  1;
         coords_above[j]+=1;
-        int index = coordinates_to_index(coords_above, config_dimension,grid_length);
-        printf("index: %i", index);
-
-        other_point =  points[index];
-        printf("ITERATION j:%i\n", j);
-
+        other_point =  points[coordinates_to_index(coords_above, config_dimension,grid_length)];
         y[2] =other_point.get_rho_old()*other_point.get_velocity_old_i(j);
       }
-      printf("ITERATION j:%i\n", j);
-
-      if(coords_of_point[j] > 0) {
+      if(coords_below[j] > 0) {
         x[0] =  -1;
         coords_below[j]-=1;
         other_point =  points[coordinates_to_index(coords_below, config_dimension,grid_length)];
@@ -77,6 +68,7 @@ void Grid::step_rho(){
 
       fit_polynomial(x, y, coeffs, DEGREE_OF_FIT);
       dpdt-= derivative_polynomial(coeffs,0);
+      printf("dpdt, %f", dpdt);
     }
     point_to_evolve.change_rho(dpdt*time_step);
   }
@@ -290,12 +282,14 @@ void Grid::get_data(){
 
 void Grid::set_points(){
   int i;
-  total_points = pow(grid_length, config_dimension);
+  total_points = pow(grid_length, config_dimension)+1;
   points = new Point[total_points]();
   printf("\n");
   for(i = 0; i<total_points; i++){
+    printf("total_pointsa: %i", total_points);
     points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i);
-    print_load_bar(i*1.0/total_points);
+    printf("i: %i\n", i);
+    //print_load_bar(i*1.0/total_points);
   }
   print_load_bar(1.0);
   printf("\n");

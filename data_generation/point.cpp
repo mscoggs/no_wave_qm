@@ -25,3 +25,12 @@ void Point::init_point(int config_dimension, double *mass, int grid_length, int 
   rho = calc_rho(coordinates, 0.0, config_dimension);
   rho_old = rho;
 }
+
+
+
+void Point::update_old_values(){
+  rho_old = rho;
+  Q_old =Q;
+  V_old =V;
+  memcpy(velocities_old, velocities, sizeof(velocities));
+}
