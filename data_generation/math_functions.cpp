@@ -5,6 +5,54 @@
 
 #include "math_functions.h"
 
+//SPECIFY THE DENSITY EQUATION HERE
+double calc_rho_initial(int *coordinates, double time, int config_dimension, int grid_length){
+  double rho=0;
+  int i;
+  for(i=0; i<config_dimension; i++) rho += double(coordinates[i]+1);
+  return rho/(grid_length*grid_length);
+}
+
+
+//SPECIFY THE VELOCITY EQUATION HERE
+void calc_velocities_initial(int *coordinates, double time, double *velocities, int config_dimension){
+  int i, j;
+  double vi;
+
+  for(i=0; i<config_dimension; i++){
+    vi = 0;
+    for(j=0; j<config_dimension; j++)     vi += (coordinates[j]+time)/(j+1);
+    velocities[i] = vi/(i+10);
+  }
+}
+
+
+//SPECIFY THE POTENTIAL EQUATION HERE
+double calc_potential(int *coordinates, int num_particles, int spatial_dimension){
+  double e = 0.5, V=0, *positioni, *positionj, distance =0;
+  int i,j,k;
+  positioni = new double[spatial_dimension];
+  positionj = new double[spatial_dimension];
+
+  for(i = 0; i<num_particles; i++){
+
+    for(k =0; k<spatial_dimension; k++) positioni[k] = coordinates[i*spatial_dimension + k];
+
+    for(j = i+1; j < num_particles; j++){
+
+      for(k =0; k<spatial_dimension; k++) positionj[k] = coordinates[j*spatial_dimension + k];
+      distance = calc_distance(positioni, positionj, spatial_dimension);
+      if(distance > 0) V += -pow(e,2)/distance;
+    }
+  }
+  return V;
+
+  //return 0;
+}
+
+
+
+
 
 
 void index_to_coordinates(int* coordinates, int index, int config_dimension, int grid_length){
@@ -20,15 +68,19 @@ void index_to_coordinates(int* coordinates, int index, int config_dimension, int
 
 int coordinates_to_index(int* coordinates, int config_dimension, int grid_length){
   int i, index=0;
-  for(i=0;i<config_dimension; i++) index+=(coordinates[i])*pow(grid_length, i);
+  for(i=0;i<config_dimension; i++){
+    index+=(coordinates[i])*int_pow(grid_length, i);
+    // printf("pow: %i",int_pow(grid_length, i));
+    // printf("coordinates[i]: %i",coordinates[i]);
+  }
   return  index;
 }
 
 
 
 
-void fit_polynomial(int *x, double *y, double *coeffs, int degree){
-  int i,j,k, n = degree, N = sizeof(x)/sizeof(int);
+void fit_polynomial(double *x, double *y, double *coeffs, int degree){
+  int i,j,k, n = degree, N = 3;
   double *sigma_x, *sigma_y, temp, t;
   sigma_x = new double[2*n+1]();
   sigma_y = new double[n+1]();
@@ -40,7 +92,6 @@ void fit_polynomial(int *x, double *y, double *coeffs, int degree){
 
   for (i=0;i<=n;i++) B[i][n+1]=sigma_y[i];
   n=n+1;
-
   for (i=0;i<n;i++){
       for (k=i+1;k<n;k++){
           if (B[i][i]<B[k][i]){
@@ -68,117 +119,27 @@ void fit_polynomial(int *x, double *y, double *coeffs, int degree){
 
 double derivative_polynomial(double *coeffs, double x_val){
   int i;
-  double value = coeffs[1];
-  for(i=2; i<sizeof(coeffs)/sizeof(double); i++){
-    value += i*coeffs[i]*pow(x_val,i-1);
-  }
+  double value = coeffs[1] + 2*coeffs[2]*x_val;
+   // for(i=2; i<sizeof(coeffs)/sizeof(double); i++){
+   //   value += i*coeffs[i]*pow(x_val,i-1);
+   // }
   return value;
 }
 
 
 double second_derivative_polynomial(double *coeffs, double x_val){
   int i;
-  double value = coeffs[2];
-  for(i=3; i<sizeof(coeffs)/sizeof(double); i++){
-    value += (i-1)*i*coeffs[i]*pow(x_val, i-2);
-  }
+  double value = 2*coeffs[2];
+  // for(i=3; i<sizeof(coeffs)/sizeof(double); i++){
+  //   value += (i-1)*i*coeffs[i]*pow(x_val, i-2);
+  // }
   return value;
 }
 
-
-
-
-
-
-//SPECIFY THE DENSITY EQUATION HERE
-double calc_rho(int *coordinates, double time, int config_dimension){
-  double spatial_dependence = 1, time_dependence =time/7;
-  int i;
-  for(i=0; i<config_dimension; i++) spatial_dependence += double(coordinates[i]*coordinates[i])/(i+1);
-  return time_dependence+spatial_dependence;
-}
-
-
-//SPECIFY THE VELOCITY EQUATION HERE
-double calc_velocity_i(int *coordinates, double time, int config_dimension, int i){
-  double vi = 0;
-  int j;
-
-  for(j=0; j<config_dimension; j++){
-    vi += (coordinates[j]+time)/(j+1);
-  }
-  return vi/(i+7);
-}
-
-
-//SPECIFY THE POTENTIAL EQUATION HERE
-double calc_potential(int *coordinates, int num_particles, int spatial_dimension){
-  // double e = 0.5, V=0, *positioni, *positionj, distance =0;
-  // int i,j,k;
-  // positioni = new double[spatial_dimension];
-  // positionj = new double[spatial_dimension];
-  //
-  // for(i = 0; i<num_particles; i++){
-  //
-  //   for(k =0; k<spatial_dimension; k++) positioni[k] = coordinates[i*spatial_dimension + k];
-  //
-  //   for(j = i+1; j < num_particles; j++){
-  //
-  //     for(k =0; k<spatial_dimension; k++) positionj[k] = coordinates[j*spatial_dimension + k];
-  //     distance = calc_distance(positioni, positionj, spatial_dimension);
-  //     if(distance > 0) V += -pow(e,2)/distance;
-  //   }
-  // }
-  // return V;
-  return 0;
-}
-
-
-
-
-
-
-
-
-
-
-
-double calc_sqrt_rho(int *coordinates,double time,  int config_dimension, int i){
-  return sqrt(calc_rho(coordinates, time, config_dimension));
-}
-
-
-
-double calc_rho_times_v(int *coordinates, double time, int config_dimension, int i){
-  return calc_rho(coordinates, time, config_dimension)*calc_velocity_i(coordinates, time, config_dimension, i);
-}
-
-
-
-
-
-double calc_quantum_potential(double *mass, int *coordinates, double time, int config_dimension){
-  double Q = 0, Q_i = 0;
-  int i, j;
-  for(i = 0; i<config_dimension; i++){
-
-    Q_i = derivative_i(calc_sqrt_rho, coordinates, time, config_dimension, EPSILON, i) / mass[i];
-    Q += Q_i;
-  }
-
-  //return (-pow(H_BAR,2) * Q) / (2 * sqrt(calc_rho(coordinates, time, velocities, config_dimension)));
-  return -Q / (2 * sqrt(calc_rho(coordinates, time, config_dimension)));
-
-}
-
-
-
-
-void calc_velocities(int *coordinates, double time, double *velocities, int config_dimension){
-  int i;
-  for(i=0; i<config_dimension; i++){
-    velocities[i] = calc_velocity_i(coordinates, time, config_dimension, i);
-  }
+int int_pow(int x, int p) {
+  if (p == 0) return 1;
+  if (p == 1) return x;
+  return x * int_pow(x, p-1);
 }
 
 
@@ -191,102 +152,10 @@ double calc_distance(double *position_1, double *position_2, int spatial_dimensi
   int i;
   double distance = 0;
   for(i=0; i<spatial_dimension; i++){
-    distance += pow(position_2[i]-position_1[i],2);
+    distance += int_pow(position_2[i]-position_1[i],2);
   }
   return sqrt(distance);
 }
-
-
-
-
-
-double divergence(double (*f)(int*, double, int, int), int * coordinates, double time, int config_dimension){
-  int i;
-  double divergence =0;
-  for(i=0; i<config_dimension; i++){
-    divergence += derivative_i(calc_rho_times_v, coordinates, time, config_dimension, EPSILON, i);
-  }
-  return divergence;
-}
-
-
-
-
-double derivative_i_potential(double (*f)(int*, int, int), int *coordinates, int config_dimension, int num_particles, int spatial_dimension, double epsilon, int index){
-  double rise=0, run = 2*epsilon;
-  int *coord_upper, *coord_lower;
-  coord_upper = new int[config_dimension]();
-  coord_lower = new int[config_dimension]();
-  for(int i = 0; i< config_dimension; i++){
-    coord_upper[i] = coordinates[i];
-    coord_lower[i] = coordinates[i];
-  }
-  coord_upper[index] += epsilon;
-  coord_lower[index] -= epsilon;
-
-  rise = f(coord_upper, num_particles, spatial_dimension) - f(coord_lower, num_particles, spatial_dimension);
-  return rise/run;
-}
-
-
-
-
-
-double derivative_i_quantum_potential(double (*f)(double*, int*, double, int), double* mass, int *coordinates, int config_dimension, double time , double epsilon, int index){
-  double rise=0, run = 2*epsilon;
-  int *coord_upper, *coord_lower;
-  coord_upper = new int[config_dimension]();
-  coord_lower = new int[config_dimension]();
-  for(int i = 0; i< config_dimension; i++){
-    coord_upper[i] = coordinates[i];
-    coord_lower[i] = coordinates[i];
-  }
-  coord_upper[index] += epsilon;
-  coord_lower[index] -= epsilon;
-
-  rise = f(mass, coord_upper, time, config_dimension) - f(mass, coord_lower, time, config_dimension);
-  return rise/run;
-}
-
-
-
-
-double derivative_i_velocity(double (*f)(int*, double, int, int), int *coordinates, double time, int config_dimension, double epsilon, int index, int j){
-  double rise=0, run = 2*epsilon;
-  int *coord_upper, *coord_lower;
-  coord_upper = new int[config_dimension]();
-  coord_lower = new int[config_dimension]();
-  for(int i = 0; i< config_dimension; i++){
-    coord_upper[i] = coordinates[i];
-    coord_lower[i] = coordinates[i];
-  }
-  coord_upper[index] += epsilon;
-  coord_lower[index] -= epsilon;
-
-  rise = f(coord_upper, time, config_dimension, j) - f(coord_lower, time, config_dimension, j);
-  return rise/run;
-}
-
-
-
-double derivative_i(double (*f)(int*, double, int, int), int *coordinates, double time, int config_dimension, double epsilon, int index){
-  double rise=0, run = 2*epsilon;
-  int *coord_upper, *coord_lower;
-  coord_upper = new int[config_dimension]();
-  coord_lower = new int[config_dimension]();
-  for(int i = 0; i< config_dimension; i++){
-    coord_upper[i] = coordinates[i];
-    coord_lower[i] = coordinates[i];
-  }
-  coord_upper[index] += epsilon;
-  coord_lower[index] -= epsilon;
-
-  rise = f(coord_upper, time, config_dimension, index) - f(coord_lower, time, config_dimension, index);
-  return rise/run;
-}
-
-
-
 
 
 
@@ -302,3 +171,92 @@ double runge_kutta(double (*f)(int*, double, int, int), double time_step){
   //
   // return change;
 }
+
+
+
+//
+// double divergence(double (*f)(int*, double, int, int), int * coordinates, double time, int config_dimension){
+//   int i;
+//   double divergence =0;
+//   for(i=0; i<config_dimension; i++){
+//     divergence += derivative_i(calc_rho_initial_times_v, coordinates, time, config_dimension, EPSILON, i);
+//   }
+//   return divergence;
+// }
+//
+//
+//
+//
+// double derivative_i_potential(double (*f)(int*, int, int), int *coordinates, int config_dimension, int num_particles, int spatial_dimension, double epsilon, int index){
+//   double rise=0, run = 2*epsilon;
+//   int *coord_upper, *coord_lower;
+//   coord_upper = new int[config_dimension]();
+//   coord_lower = new int[config_dimension]();
+//   for(int i = 0; i< config_dimension; i++){
+//     coord_upper[i] = coordinates[i];
+//     coord_lower[i] = coordinates[i];
+//   }
+//   coord_upper[index] += epsilon;
+//   coord_lower[index] -= epsilon;
+//
+//   rise = f(coord_upper, num_particles, spatial_dimension) - f(coord_lower, num_particles, spatial_dimension);
+//   return rise/run;
+// }
+//
+//
+//
+//
+//
+// double derivative_i_quantum_potential(double (*f)(double*, int*, double, int), double* mass, int *coordinates, int config_dimension, double time , double epsilon, int index){
+//   double rise=0, run = 2*epsilon;
+//   int *coord_upper, *coord_lower;
+//   coord_upper = new int[config_dimension]();
+//   coord_lower = new int[config_dimension]();
+//   for(int i = 0; i< config_dimension; i++){
+//     coord_upper[i] = coordinates[i];
+//     coord_lower[i] = coordinates[i];
+//   }
+//   coord_upper[index] += epsilon;
+//   coord_lower[index] -= epsilon;
+//
+//   rise = f(mass, coord_upper, time, config_dimension) - f(mass, coord_lower, time, config_dimension);
+//   return rise/run;
+// }
+//
+//
+//
+//
+// double derivative_i_velocity(double (*f)(int*, double, int, int), int *coordinates, double time, int config_dimension, double epsilon, int index, int j){
+//   double rise=0, run = 2*epsilon;
+//   int *coord_upper, *coord_lower;
+//   coord_upper = new int[config_dimension]();
+//   coord_lower = new int[config_dimension]();
+//   for(int i = 0; i< config_dimension; i++){
+//     coord_upper[i] = coordinates[i];
+//     coord_lower[i] = coordinates[i];
+//   }
+//   coord_upper[index] += epsilon;
+//   coord_lower[index] -= epsilon;
+//
+//   rise = f(coord_upper, time, config_dimension, j) - f(coord_lower, time, config_dimension, j);
+//   return rise/run;
+// }
+//
+//
+//
+// double derivative_i(double (*f)(int*, double, int, int), int *coordinates, double time, int config_dimension, double epsilon, int index){
+//   double rise=0, run = 2*epsilon;
+//   int *coord_upper, *coord_lower;
+//   coord_upper = new int[config_dimension]();
+//   coord_lower = new int[config_dimension]();
+//   for(int i = 0; i< config_dimension; i++){
+//     coord_upper[i] = coordinates[i];
+//     coord_lower[i] = coordinates[i];
+//   }
+//   coord_upper[index] += epsilon;
+//   coord_lower[index] -= epsilon;
+//
+//   rise = f(coord_upper, time, config_dimension, index) - f(coord_lower, time, config_dimension, index);
+//   return rise/run;
+// }
+//

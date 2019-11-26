@@ -16,13 +16,10 @@ void Point::init_point(int config_dimension, double *mass, int grid_length, int 
   velocities = new double[config_dimension]();
   velocities_old = new double[config_dimension]();
   index_to_coordinates(coordinates, index,config_dimension, grid_length);
-  calc_velocities(coordinates, 0.0, velocities, config_dimension);
+  calc_velocities_initial(coordinates, 0.0, velocities, config_dimension);
   memcpy(velocities_old, velocities, sizeof(velocities));
-  Q = calc_quantum_potential(mass, coordinates, 0.0, config_dimension);
-  Q_old = Q;
   V = calc_potential(coordinates, num_particles, spatial_dimension);
-  V_old = V;
-  rho = calc_rho(coordinates, 0.0, config_dimension);
+  rho = calc_rho_initial(coordinates, 0.0, config_dimension, grid_length);
   rho_old = rho;
 }
 
@@ -30,7 +27,5 @@ void Point::init_point(int config_dimension, double *mass, int grid_length, int 
 
 void Point::update_old_values(){
   rho_old = rho;
-  Q_old =Q;
-  V_old =V;
   memcpy(velocities_old, velocities, sizeof(velocities));
 }

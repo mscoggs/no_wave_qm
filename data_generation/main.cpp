@@ -9,8 +9,10 @@
 #include "grid.h"
 #include "math_functions.h"
 
-//g++ -o main main.cpp grid.cpp point.cpp math_functions.cpp -std=c++11
-//./main
+/*
+g++ -o main main.cpp grid.cpp point.cpp math_functions.cpp -std=c++11
+./main
+*/
 
 
 
