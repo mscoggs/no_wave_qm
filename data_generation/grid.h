@@ -91,10 +91,10 @@ private:
   void step_trajectory_runge_kutta(double *position);
   void get_runge_kutta_velocity(double t, double *position_temp, double *velocity_of_trajectory);
 
-  
 
 
-  int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, vel_function, rho_function, v_function;
+
+  int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, vel_function, rho_function, v_function, psi_function;
   double *mass, *trajectories, time, time_step, total_time, point_spacing, point_offset, time_step_save, *k1, *k2, *k3, *k4;
   Point *points;
   std::string dir, write_folder;

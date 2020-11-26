@@ -12,7 +12,7 @@ double const INF_WELL_RADIUS = 15;
 double const OMEGA = 0.01;
 double const H_BAR = 1.0545*pow(10,-34);
 double const H_BAR_SQUARED = pow(H_BAR,2);
-double const PI = 3.14159265359;
+double const PI = 3.14159265358979323846;
 double const INF = std::numeric_limits<double>::infinity();
 double const Z = 1.0;
 double const E = 1.60217*pow(10,-19);//1.0;
@@ -21,6 +21,19 @@ double const PERM = 8.854*pow(10,-12);
 double const A0 = 4*PI*PERM*H_BAR_SQUARED/(ME*E*E);
 double const B1 = 4*Z*ME*E*E/H_BAR_SQUARED;
 double const B2 = B1/3;
+double const LAMBDA = 0.01;
+
+
+
+
+
+double j_d(double x, double y, double n);
+
+double get_theta(double x, double y);
+
+
+double factorial_double(double n);
+
 
 
 /**
@@ -127,6 +140,7 @@ void print_double_array(double *array, int size);
 double j_1(double x, int grid_length);
 
 double j_n(double x, int n);
-
-
+double j_n_non_int(double x, double n);
+int factorial(int n);
+double non_int_hermite(double x, double n, int mult);
 #endif

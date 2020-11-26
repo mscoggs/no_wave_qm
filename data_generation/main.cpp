@@ -12,14 +12,7 @@
 #include "input_functions.h"
 
 
-/*
-g++ -o main main.cpp grid.cpp point.cpp math_functions.cpp -std=c++11
-./main
 
-OR
-
-make run
-*/
 
 main(int argc, char *argv[]){
   int i, j;

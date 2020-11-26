@@ -307,7 +307,7 @@ void Grid::set_points(){
   total_points = int_pow(grid_length, config_dimension);
   points = new Point[total_points]();
   for(i = 0; i<total_points; i++){
-    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, rho_function, vel_function, v_function);
+    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, v_function);
     print_load_bar(i*1.0/total_points);
   }
   calc_Q();
@@ -433,6 +433,11 @@ void Grid::get_data(){
       if(line=="INITIAL_DENSITY_FUNCTION"){
         getline(input, line);
         rho_function = stoi(line);
+        continue;
+      }
+      if(line=="PSI_FUNCTION"){
+        getline(input, line);
+        psi_function = stoi(line);
         continue;
       }
       if(line=="POTENTIAL_FUNCTION"){

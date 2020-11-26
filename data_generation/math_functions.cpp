@@ -7,6 +7,19 @@
 #include "math_functions.h"
 
 
+double factorial_double(double n){
+  double step = 0.001;
+  double sum = 0, lhs=0, rhs = step;
+  double int_limit = 1000;
+
+  while(rhs < int_limit){
+    sum += ((pow(lhs,n)/exp(lhs)) + (pow(rhs,n)/exp(rhs)))/2;
+    lhs = rhs;
+    rhs += step;
+  }
+  return sum/int_limit;
+}
+
 
 
 
@@ -196,6 +209,131 @@ double j_n(double x, int n){
   return sum/PI;
 }
 
+
+double j_n_non_int(double x, double n){
+  double sum1 =0, sum2 =0, left, right, step = 0.001;
+  double o=step;
+  left = 1;
+  while(o<=PI+step/2){
+    right = cos(x*sin(o) - n*(o));
+    sum1 += (right+left)*step/2;
+    left = right;
+    o += step;
+  }
+
+
+  o=step;
+  left = 1;
+  while(o<=20){
+    right = exp(-n*o - x*sinh(o));
+    sum2 += (right+left)*step/2;
+    left = right;
+    o += step;
+  }
+
+  sum2 = sum2 * sin(n*PI);
+  return (sum1-sum2)/PI;
+}
+
+
+double j_d(double x, double y, double n){
+  double sum1 =0, sum2 =0, left, right, step = 0.001;
+  double o=step;
+  double z = 0;
+
+  if(n == 1.5) z = 10.904;
+  else if(n == 1) z = 10.173;
+  else{
+    printf("No Z_nm for the given n\n\n");
+    exit(0);
+  }
+  x = (z/INF_WELL_RADIUS)*sqrt(x*x + y*y);
+  left = 1;
+  while(o<=PI+step/2){
+    right = cos(x*sin(o) - n*(o));
+    sum1 += (right+left)*step/2;
+    left = right;
+    o += step;
+  }
+
+
+  o=step;
+  left = 1;
+  while(o<=20){
+    right = exp(-n*o - x*sinh(o));
+    sum2 += (right+left)*step/2;
+    left = right;
+    o += step;
+  }
+
+  sum2 = sum2 * sin(n*PI);
+  return (sum1-sum2)/PI;
+}
+
+int factorial(int n){
+  int total = 1;
+  int i = 1;
+  while(i <= n){
+    total = total*i;
+    i+=1;
+  }
+  return total;
+}
+
+
+
+double get_theta(double x, double y){
+  double r = sqrt(x*x+y*y);
+  double theta = asin(y/r);
+  if(x < 0) theta = PI -theta;
+  return theta;
+}
+
+// double sin_ao(double x, double y, double a){
+//   return sin(a*get_theta(x,y));
+// }
+//
+// double cos_ao(double x, double y, double a){
+//   double r = sqrt(x*x+y*y);
+//
+//   double theta = arccos(y/r);
+//   if(x < 0) theta += PI;
+//   return sin(a*theta);
+// }
+double non_int_hermite(double x, double n, int mult){
+  double total =  0;
+  double term_total = 0;
+  //int mult = 10;
+  int limit = (int)ceil(n*mult);
+  int pow_2 = 1;
+  int i,j;
+  double n_prod;
+  for(i=0; i<limit;i++){
+
+
+    if(i%2 == 0) pow_2 = i/2;
+    else pow_2 = (i-1)/2;
+
+
+
+    n_prod=1;
+    for(j=0; j<i-1;j++){
+      if((i-j)%2 == 0) n_prod = n_prod*(j-n);
+    }
+
+
+    term_total = n_prod*pow(x,i)*pow(2,pow_2)/factorial(i);
+    // printf("n_prod: %f  ",n_prod);
+    // printf("pow(x,i),pow_2%f %i",pow(x,i),pow_2);
+    // //printf("pow_2: %f   ",pow_2);
+    // printf("pow(2,pow_2): %f   ",pow(2,pow_2));
+    // printf("factorial(i): %i   \n\n",factorial(i));
+
+    total += term_total;
+  }
+  //exit(0);
+  return total;
+}
 
 
 // double divergence(double (*f)(int*, double, int, int), int * coordinates, double time, int config_dimension){
