@@ -523,11 +523,6 @@ void Grid::write_data(){
 
 
 
-
-
-
-
-
 void Grid::step_trajectories(){
   int i,j;
   double  *coords_of_trajectory;
