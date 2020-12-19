@@ -7,8 +7,10 @@
 
 
 
-Psi calc_psi(double x, double y, int psi_function){
-  double re, im, r = x*x+y*y, theta= get_theta(x,y);
+Psi calc_psi(double x, double y, int psi_function, double coord_to_distance){
+  x = x*coord_to_distance, y = y*coord_to_distance;
+
+  double re, im, r = sqrt(x*x+y*y), theta= get_theta(x,y);
 
   switch(psi_function){
     case 12: //perturbed inf-well
@@ -25,7 +27,7 @@ Psi calc_psi(double x, double y, int psi_function){
 
 
 
-double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function){
+double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function, double coord_to_distance){
   int a = psi_function;
   double x, y, center, A,epsilon = pow(10,-3), d0,d1;
   double *x3,*y3, *abc;
@@ -36,18 +38,18 @@ double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dime
   center = (grid_length-1.0)/2.0;
   x = static_cast<double>(coordinates[0])-center;
   y = static_cast<double>(coordinates[1])-center;
-  Psi psi = calc_psi(x,y,a), psi0, psi2;
+  Psi psi = calc_psi(x,y,a,coord_to_distance), psi0, psi2;
   A = H_BAR/(mass[0]*(1 + pow(psi.imaginary/psi.real,2)));
 
 
   x3[0] = 2-epsilon, x3[1] = 2, x3[2] = 2+epsilon;
-  psi0 = calc_psi(x-epsilon,y,a), psi2 = calc_psi(x+epsilon,y,a);
+  psi0 = calc_psi(x-epsilon,y,a,coord_to_distance), psi2 = calc_psi(x+epsilon,y,a,coord_to_distance);
   y3[0] = psi0.imaginary/psi0.real, y3[1] = psi.imaginary/psi.real, y3[2] = psi2.imaginary/psi2.real;
   fit_polynomial(x3, y3, abc, 2);
   d0 = nth_derivative_polynomial(abc, 2, 2, 1);
 
   //x3[0] = y-epsilon, x3[1] = y, x3[2] = 2+epsilon;
-  psi0 = calc_psi(x,y-epsilon,a), psi2 = calc_psi(x,y+epsilon,a);
+  psi0 = calc_psi(x,y-epsilon,a,coord_to_distance), psi2 = calc_psi(x,y+epsilon,a,coord_to_distance);
   y3[0] = psi0.imaginary/psi0.real, y3[1] = psi.imaginary/psi.real, y3[2] = psi2.imaginary/psi2.real;
   fit_polynomial(x3, y3, abc, 2);
   d1 = nth_derivative_polynomial(abc, 2, 2, 1);

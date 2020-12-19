@@ -11,3 +11,7 @@ run:
 run_test:
 	$(CC) -o math_test math_test.cpp math_functions.cpp
 	./math_test
+
+test:
+	$(CC) -o test test.cpp math_functions.cpp
+	./test

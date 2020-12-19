@@ -236,6 +236,50 @@ double j_n_non_int(double x, double n){
 }
 
 
+complex f(double t, double x, double n){
+  complex en, ef, power, result;
+  power.re = -cos(4*PI*t)+2*cos(2*PI*t)*x;
+  power.im = -sin(4*PI*t)+2*sin(2*PI*t)*x;
+
+
+  ef.re = exp(power.re) * cos(power.im );
+  ef.im = exp(power.re) * sin(power.im );
+
+  en.re = cos(-2*PI*n*t);
+  en.im = sin(-2*PI*n*t);
+
+
+  result.re = ef.re*en.re - ef.im*en.im;
+  result.im = ef.im*en.re + ef.re*en.im;
+  return result;
+}
+
+complex hermite_contour(double x, double y, double n){
+
+
+    double r = sqrt(x*x+y*y);
+    double t = 0, stop = 1, dt = 0.01;
+    complex sum, result;
+
+    sum.re = 0, sum.im = 0;
+
+    while(t < stop){
+      result = f(t,r,n);
+      sum.re += result.re*dt;
+      sum.im += result.im*dt;
+      t+=dt;
+    }
+    sum.re = sum.re * factorial_double(n);
+    sum.re = sum.im * factorial_double(n);
+
+    printf("sum.re : %f \n\n", sum.re);
+    return sum;
+}
+
+
+
+
+
 double j_d(double x, double y, double n){
   double sum1 =0, sum2 =0, left, right, step = 0.001;
   double o=step;

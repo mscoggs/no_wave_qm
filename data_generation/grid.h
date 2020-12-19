@@ -95,7 +95,7 @@ private:
 
 
   int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, vel_function, rho_function, v_function, psi_function;
-  double *mass, *trajectories, time, time_step, total_time, point_spacing, point_offset, time_step_save, *k1, *k2, *k3, *k4;
+  double *mass, *trajectories, time, time_step, total_time, coord_to_distance, point_offset, time_step_save, *k1, *k2, *k3, *k4;
   Point *points;
   std::string dir, write_folder;
 };

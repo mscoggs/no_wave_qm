@@ -95,14 +95,14 @@ void Grid::step_rho(){
       memcpy(coords_below, coords_of_point, config_dimension*sizeof(int));
 
       if(coords_above[j] < grid_length - 1){
-        x[2] +=  point_spacing;
+        x[2] +=  coord_to_distance;
         coords_above[j]+=1;
         other_point =  points[coordinates_to_index(coords_above, config_dimension,grid_length)];
         y[2] =other_point.get_rho_old()*other_point.get_velocity_old_i(j);
       }
 
       if(coords_below[j] > 0) {
-        x[0] -=  point_spacing;
+        x[0] -=  coord_to_distance;
         coords_below[j]-=1;
         other_point =  points[coordinates_to_index(coords_below, config_dimension,grid_length)];
         y[0] =other_point.get_rho_old()*other_point.get_velocity_old_i(j);
@@ -164,7 +164,7 @@ void Grid::step_velocities(){
       std::fill_n(coeffsv, 3, 0.0);
 
       if(coords_of_point[j] < grid_length-1){
-        x[2] +=  point_spacing;
+        x[2] +=  coord_to_distance;
         coords_above[j]+=1;
         other_point =  points[coordinates_to_index(coords_above, config_dimension,grid_length)];
         other_point.get_velocities_old(vel_above, config_dimension);
@@ -174,7 +174,7 @@ void Grid::step_velocities(){
       }
 
       if(coords_of_point[j] > 0){
-        x[0] -= point_spacing;
+        x[0] -= coord_to_distance;
         coords_below[j]-=1;
         other_point =  points[coordinates_to_index(coords_below, config_dimension,grid_length)];
         other_point.get_velocities_old(vel_below, config_dimension);
@@ -234,12 +234,12 @@ void Grid::calc_Q(){
 
           if((coords_of_point[j] == 0) || coords_of_point[j] == grid_length-1){ //this is an edge case, fit a polynomial centered around the point interior to this.
             if(coords_of_point[j] == 0){
-              x[2] += 2*point_spacing;
+              x[2] += 2*coord_to_distance;
               coords_above[j] += 2;
               point_above =  points[coordinates_to_index(coords_above, config_dimension,grid_length)];
               y[2] = sqrt(point_above.get_rho_old());
 
-              x[1] += point_spacing;
+              x[1] += coord_to_distance;
               coords_below[j] += 1;
               point_below =  points[coordinates_to_index(coords_below, config_dimension,grid_length)];
               y[1] = sqrt(point_below.get_rho_old());
@@ -247,12 +247,12 @@ void Grid::calc_Q(){
               edge_sign = 1;
             }
             else{
-              x[1] -= point_spacing;
+              x[1] -= coord_to_distance;
               coords_above[j] -= 1;
               point_above =  points[coordinates_to_index(coords_above, config_dimension,grid_length)];
               y[1] = sqrt(point_above.get_rho_old());
 
-              x[0] -= 2*point_spacing;
+              x[0] -= 2*coord_to_distance;
               coords_below[j] -=2;
               point_below =  points[coordinates_to_index(coords_below, config_dimension,grid_length)];
               y[0] = sqrt(point_below.get_rho_old());
@@ -262,16 +262,16 @@ void Grid::calc_Q(){
             }
 
             fit_polynomial(x, y, coeffs, degree_of_fit);
-            Q_j = nth_derivative_polynomial(coeffs, point_offset-edge_sign*point_spacing, degree_of_fit, 2);
+            Q_j = nth_derivative_polynomial(coeffs, point_offset-edge_sign*coord_to_distance, degree_of_fit, 2);
 
           }
           else{
-            x[2] +=  point_spacing;
+            x[2] +=  coord_to_distance;
             coords_above[j]+=1;
             point_above =  points[coordinates_to_index(coords_above, config_dimension,grid_length)];
             y[2] = sqrt(point_above.get_rho_old());
 
-            x[0] -= point_spacing;
+            x[0] -= coord_to_distance;
             coords_below[j]-=1;
             point_below =  points[coordinates_to_index(coords_below, config_dimension,grid_length)];
             y[0] = sqrt(point_below.get_rho_old());
@@ -307,7 +307,7 @@ void Grid::set_points(){
   total_points = int_pow(grid_length, config_dimension);
   points = new Point[total_points]();
   for(i = 0; i<total_points; i++){
-    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, v_function);
+    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, v_function, coord_to_distance);
     print_load_bar(i*1.0/total_points);
   }
   calc_Q();
@@ -382,10 +382,10 @@ void Grid::get_data(){
         time_step = stod(line);
         continue;
       }
-      if(line=="POINT_SPACING"){
+      if(line=="COORD_TO_DISTANCE"){
         getline(input, line);
-        point_spacing = stod(line);
-        point_offset = 0;//point_spacing+ 0.01;
+        coord_to_distance = stod(line);
+        point_offset = 0;//coord_to_distance+ 0.01;
         continue;
       }
       if(line=="DEGREE_OF_FIT"){

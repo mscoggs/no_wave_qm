@@ -8,9 +8,9 @@ struct Psi
      double imaginary;
 };
 
-Psi calc_psi(double x, double y, int psi_function);
+Psi calc_psi(double x, double y, int psi_function,double coord_to_distance);
 
-double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function);
+double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function, double coord_to_distance);
 /**
     calculating the potential function
 

@@ -23,9 +23,15 @@ double const B1 = 4*Z*ME*E*E/H_BAR_SQUARED;
 double const B2 = B1/3;
 double const LAMBDA = 0.01;
 
+struct complex {
+  double re;
+  double im;
+};
 
 
+complex hermite_contour(double x, double y, double n);
 
+complex f(double t, double x, double n);
 
 double j_d(double x, double y, double n);
 
