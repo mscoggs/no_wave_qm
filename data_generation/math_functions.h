@@ -9,7 +9,8 @@
 
 bool const INF_CHECK = false;
 double const INF_WELL_RADIUS = 15;
-double const OMEGA = 0.01;
+double const OMEGA = 0.00001;
+double const H = 6.62607015*pow(10,-34);
 double const H_BAR = 1.0545*pow(10,-34);
 double const H_BAR_SQUARED = pow(H_BAR,2);
 double const PI = 3.14159265358979323846;
@@ -22,6 +23,7 @@ double const A0 = 4*PI*PERM*H_BAR_SQUARED/(ME*E*E);
 double const B1 = 4*Z*ME*E*E/H_BAR_SQUARED;
 double const B2 = B1/3;
 double const LAMBDA = 0.01;
+double const MASS_OVER_HBAR = (9.109/1.0545)*pow(10,3);
 
 struct complex {
   double re;
@@ -30,8 +32,8 @@ struct complex {
 
 
 complex hermite_contour(double x, double y, double n);
-
 complex f(double t, double x, double n);
+complex f2(double t, double x, double n);
 
 double j_d(double x, double y, double n);
 

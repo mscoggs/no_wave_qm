@@ -20,7 +20,7 @@ public:
       @param index the index-th point in the grid, used to get the coordinates of the point
 
   */
-  void init_point(int config_dimension,double *mass, int grid_length, int num_particles, int spatial_dimension, int index, int psi_function, int v_function, double coord_to_distance);
+  void init_point(int config_dimension,double *mass, int grid_length, int num_particles, int spatial_dimension, int index, int psi_function, int potential_function, double coord_to_distancee, bool velocity_perturbation, double v_perturb);
 
 
 
@@ -56,6 +56,7 @@ public:
   double get_velocity_oldest_i(int i){return velocities_oldest[i];}
 
   double get_V(){return V;}
+  double set_V(double new_V){V = new_V;}
   double get_Q(){return Q;}
 
 

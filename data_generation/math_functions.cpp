@@ -254,6 +254,29 @@ complex f(double t, double x, double n){
   return result;
 }
 
+
+
+
+complex f2(double t, double x, double n){
+  complex en, ef, power, result;
+
+
+
+
+  power.re = -cos(4*PI*t)+2*cos(2*PI*t)*x;
+  power.im = -sin(4*PI*t)+2*sin(2*PI*t)*x;
+
+
+  result.re = cos(-2*PI*n*t + power.im);
+  result.im = sin(-2*PI*n*t + power.im);
+
+  result.re = result.re *exp(power.re);
+  result.im = result.im *exp(power.re);
+
+  return result;
+}
+
+
 complex hermite_contour(double x, double y, double n){
 
 
@@ -265,14 +288,19 @@ complex hermite_contour(double x, double y, double n){
 
     while(t < stop){
       result = f(t,r,n);
+      //printf("result: %f, %f\n", result.re, result.im);
       sum.re += result.re*dt;
       sum.im += result.im*dt;
+      //printf("sum: %f, %f\n\n\n", sum.re, sum.im);
+
       t+=dt;
     }
     sum.re = sum.re * factorial_double(n);
-    sum.re = sum.im * factorial_double(n);
+    sum.im = sum.im * factorial_double(n);
 
-    printf("sum.re : %f \n\n", sum.re);
+    //printf("r, n : %f, %f \n", r, n);
+    // printf("sum.re : %f \n", sum.re);
+    // printf("sum.im : %f \n", sum.im);
     return sum;
 }
 
@@ -299,6 +327,7 @@ double j_d(double x, double y, double n){
     left = right;
     o += step;
   }
+
 
 
   o=step;
@@ -345,6 +374,7 @@ double get_theta(double x, double y){
 //   return sin(a*theta);
 // }
 double non_int_hermite(double x, double n, int mult){
+  printf("WARNING, THIS FUNCTION IS NOT WORKING");
   double total =  0;
   double term_total = 0;
   //int mult = 10;

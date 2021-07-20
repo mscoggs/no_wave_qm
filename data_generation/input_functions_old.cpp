@@ -172,7 +172,7 @@ void calc_velocities_initial(int *coordinates, double *velocities, int config_di
 
 
 
-double calc_potential(int *coordinates, int num_particles, int spatial_dimension, int v_function, int grid_length, double *mass){
+double calc_potential(double time, int *coordinates, int num_particles, int spatial_dimension, int potential_function, int grid_length, double *mass){
   double x, y, center, r;
   double e = 0.5, V=0, *positioni, *positionj, distance =0;
 
@@ -180,7 +180,7 @@ double calc_potential(int *coordinates, int num_particles, int spatial_dimension
   x = static_cast<double>(coordinates[0])-center;
   y = static_cast<double>(coordinates[1])-center;
 
-  switch(v_function){
+  switch(potential_function){
     case 1: //plane_wave
       return 0;
     case 2: //holland_ex4.11_pg169

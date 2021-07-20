@@ -47,18 +47,47 @@ void Grid::evolve(){
   int i = 0;
 
   while(time < total_time){
-    print_evolution_info();
-    if(i > 1 && i%2==0) step_trajectories();
+    //print_evolution_info();
+    printf("Time = %5.3f.  ", time);
+
+    if(i > 1 && i%2==0){
+      printf("Evolving trajectories... ");
+
+      step_trajectories();
+
+    }
+    printf("Calculating Q... ");
     calc_Q();
-    if(fmod(time+0.5*time_step, time_step_save) < time_step) write_data();
-    //if(abs(time-7885)<0.5) write_data();
+
+    printf("Calculating loop integral...  ");
+    calc_loop();
+
+
+    //Keep this here?
+    if(save && (fmod(time+0.5*time_step, time_step_save) < time_step)){
+      printf("Writing data...  ");
+      write_data();
+    }
+
+    printf("Evolving rho...  ");
     step_rho();
+
+    printf("Evolving velocities...  ");
     step_velocities();
+
+    printf("Evolving V... ");
+    step_V();
+
+    printf("Updating the grid and moving to the next step...  \n");
+
+
     update_grid();
+
     time += time_step;
     i+=1;
+
     }
-  write_data();
+  if (save) write_data();
 }
 
 
@@ -292,6 +321,21 @@ void Grid::calc_Q(){
 
 
 
+void Grid::step_V(){
+  int i, *coords_of_point;
+  coords_of_point = new int[config_dimension]();
+  //printf("time: %f", time);
+  for(i = 0; i<total_points; i++){
+    points[i].get_coordinates(coords_of_point, config_dimension);
+    points[i].set_V(calc_potential(time, coords_of_point, num_particles, spatial_dimension, potential_function, grid_length, mass));
+    //if(i==0) printf("\n\nV calc %e", calc_potential(time, coords_of_point, num_particles, spatial_dimension, potential_function, grid_length, mass));
+  }
+  //printf("\n\nV frist and last: %e, %e\n\n", points[0].get_V(), points[total_points-1].get_V());
+  delete[] coords_of_point;
+
+}
+
+
 
 
 void Grid::update_grid(){
@@ -307,7 +351,7 @@ void Grid::set_points(){
   total_points = int_pow(grid_length, config_dimension);
   points = new Point[total_points]();
   for(i = 0; i<total_points; i++){
-    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, v_function, coord_to_distance);
+    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, potential_function, coord_to_distance, velocity_perturbation,  v_perturb);
     print_load_bar(i*1.0/total_points);
   }
   calc_Q();
@@ -393,16 +437,6 @@ void Grid::get_data(){
         degree_of_fit = stoi(line);
         continue;
       }
-      if(line=="DEGREE_OF_FIT"){
-        getline(input, line);
-        degree_of_fit = stoi(line);
-        continue;
-      }
-      if(line=="DEGREE_OF_FIT"){
-        getline(input, line);
-        degree_of_fit = stoi(line);
-        continue;
-      }
       if(line=="NUMBER_OF_TRAJECTORIES"){
         getline(input, line);
         num_trajectories = stoi(line);
@@ -425,16 +459,6 @@ void Grid::get_data(){
         }
         continue;
       }
-      if(line=="INITIAL_VELOCITY_FUNCTION"){
-        getline(input, line);
-        vel_function = stoi(line);
-        continue;
-      }
-      if(line=="INITIAL_DENSITY_FUNCTION"){
-        getline(input, line);
-        rho_function = stoi(line);
-        continue;
-      }
       if(line=="PSI_FUNCTION"){
         getline(input, line);
         psi_function = stoi(line);
@@ -442,8 +466,32 @@ void Grid::get_data(){
       }
       if(line=="POTENTIAL_FUNCTION"){
         getline(input, line);
-        v_function = stoi(line);
+        potential_function = stoi(line);
         continue;
+      }
+
+      if(line=="VELOCITY_PERTURBATION"){
+        getline(input, line);
+        if(line == "True" || line == "TRUE" || line == "true") velocity_perturbation = true;
+        else if(line == "False" || line == "FALSE" || line == "false") velocity_perturbation = false;
+        else{
+          printf("\n\n Error reading velocity_perturbation in input.txt, quitting");
+          exit(0);
+        }
+      }
+      if(line=="VELOCITY_PERTURBATION_VALUE"){
+        getline(input, line);
+        v_perturb = stoi(line);
+        continue;
+      }
+      if(line=="SAVE"){
+        getline(input, line);
+        if(line == "True" || line == "TRUE" || line == "true") save = true;
+        else if(line == "False" || line == "FALSE" || line == "false") save = false;
+        else{
+          printf("\n\n Error reading SAVE in input.txt, quitting");
+          exit(0);
+        }
       }
       if(line=="WRITE_FOLDER"){
         getline(input, line);
@@ -469,19 +517,26 @@ void Grid::write_data(){
   std::string coord_string = "[", velocities_string = "[";
   std::string file_name_evolve = "time_" +std::to_string(time)+ ".txt";;
   std::string file_name_trajectories = "trajectories.txt";
+  std::string file_name_loops = "loops.txt";
   std::ofstream file;
-
 
   //creating the directory/wiping the trajectory file for the first call to this function
   if(time == 0){
 
-    dir = "../data/" + write_folder;
+    dir = "..\\data\\" + write_folder;
+
 
     std::string cmd1 = "rm -rf ";
+    #ifdef _WIN32
+        cmd1 = "rmdir /S /Q ";
+    #endif
+
     std::string cmd2 = "mkdir ";
     int status = system((cmd1 + dir).c_str());
     status = system((cmd2 + dir).c_str());
+
     std::ifstream src("../inputs/input.txt", std::ios::binary);
+
     std::ofstream dest(dir+"/input.txt", std::ios::binary);
     dest << src.rdbuf();
     file.open(dir + "/" + file_name_trajectories);
@@ -489,11 +544,16 @@ void Grid::write_data(){
     for(i = 0; i<num_trajectories; i++) file << "position" <<  i << "   ";
     file << "\n";
     file.close();
+
+    file.open(dir + "/" + file_name_loops);
+    file << "time     loop_value       loop_value*mass/pi*h_bar     \n";
+    file.close();
+
   }
 
   //writing the evolution information for every point to a single file
   file.open(dir + "/" + file_name_evolve);
-  file << "coordinates  index   rho      Q      V      velocities\n";
+  file << "coordinates  index   rho      Q      V    velocities \n";
   for(i = 0; i<total_points; i++){
     for(j = 0; j<config_dimension; j++){
       coord_string += std::to_string(points[i].get_coordinates_i(j)) + ",";
@@ -501,7 +561,7 @@ void Grid::write_data(){
     }
     coord_string.append("]");
     velocities_string.append("]");
-    file  << coord_string << "   " << i << "   " << points[i].get_rho() << "   " << points[i].get_Q() << "   " << points[i].get_V() << "   " << velocities_string << "\n";
+    file  << coord_string << "   " << i << "   " << points[i].get_rho() << "   " << points[i].get_Q() << "   " << points[i].get_V() << "   " << velocities_string <<"\n";
     coord_string = "[", velocities_string = "[";
   }
   file.close();
@@ -516,9 +576,99 @@ void Grid::write_data(){
   }
   file << "\n";
   file.close();
+
+
+  file.open(dir + "/" + file_name_loops, std::ios::app);
+  file << time << "  " <<  std::to_string(loop) << "  " <<  std::to_string(loop*MASS_OVER_HBAR/(2*PI)) << "   \n";
+  file.close();
+
+
 }
 
 
+void Grid::calc_loop(){
+  double x_mid = (grid_length-1.0)/2.0, y_mid = (grid_length-1.0)/2.0;
+  double loop_radius = 7;
+
+  if(loop_radius*2-1 >= grid_length){
+    printf("loop radius is too big for this grid length, skipping loop integral");
+    return;
+  }
+  if(config_dimension != 2){
+    printf("calc_loop is only meant for 2D, skipping\n");
+    return;
+  }
+  double *position, *vel;
+  position = new double[config_dimension]();
+  vel = new double[config_dimension]();
+  double theta = 0;
+  double r = loop_radius;
+  double d0_step = 0.001;
+  double sum = 0;
+
+  for(theta =0; theta<2*PI; theta += d0_step){ //Assuming 2D, but can be modified for more dimensions
+    position[0] = x_mid + r*cos(theta);
+    position[1] = y_mid + r*sin(theta);
+
+    get_loop_velocity(position, vel);
+    double vel_mag = sqrt(vel[0]*vel[0]+vel[1]*vel[1]);
+    // printf("This should be an int: %f\n\n",loop_radius*vel_mag*MASS_OVER_HBAR);
+    // printf("vel_mag: %f\n\n",vel_mag);
+    // printf("1/(loop_radius*MASS_OVER_HBAR): %f\n\n",1/(loop_radius*MASS_OVER_HBAR));
+    // printf("vel0, vel1 %f, %f\n", vel[0], vel[1]);
+    sum += d0_step*r*(cos(theta)*vel[1] - sin(theta)*vel[0]);
+  }
+  loop = sum;
+  // printf("loop: %f\n",loop );
+  delete[] position, delete[] vel;
+}
+
+
+
+void Grid::get_loop_velocity(double *position, double *vel){
+
+  int i,j,k, *neighbor_coords, n;
+  Point point;
+  double *neighbor_vel, *delta_n;
+
+
+  neighbor_coords = new int[config_dimension*num_neighbors]();
+  neighbor_vel = new double[config_dimension*num_neighbors]();
+  delta_n = new double[spatial_dimension]();
+
+
+  //getting all neighbor combinations using bit a bit operation
+  for(i=0; i<num_neighbors; i++){
+    for(j=0; j<config_dimension; j++){
+      if(i&(1<<j)) neighbor_coords[i*config_dimension + j] = ceil(position[j]);
+      else neighbor_coords[i*config_dimension + j] = floor(position[j]);
+    }
+  }
+
+  for(i=0; i<spatial_dimension; i++) delta_n[i] = position[i] - floor(position[i]);
+
+  //grabbing the velocities of all the neighbors
+  for(j=0; j<num_neighbors; j++){
+    point = points[coordinates_to_index(&neighbor_coords[j*config_dimension], config_dimension,grid_length)];
+    point.get_velocities(&neighbor_vel[j*config_dimension], config_dimension);
+  }
+
+
+  //doing a simple linear interpolation, first interpolating in the 'x' direction, then y, then z ... should work for an abitrary configuration_dimension
+  n = num_neighbors;
+  for(i=0; i<config_dimension; i++){
+    for(j=0; j<n; j+=2){
+      for(k=0; k<config_dimension;k++) neighbor_vel[j*config_dimension +k] += (neighbor_vel[(j+1)*config_dimension +k]-neighbor_vel[(j)*config_dimension +k]) *delta_n[i];
+    }
+    n = n/2;
+    for(j=0; j<n; j++){
+      for(k=0; k<config_dimension;k++) neighbor_vel[j*config_dimension +k] = neighbor_vel[j*config_dimension*2 +k];
+    }
+  }
+  for(i=0; i<config_dimension; i++) vel[i] = neighbor_vel[i];
+
+  delete[] neighbor_coords, delete[] neighbor_vel, delete[] delta_n;
+}
 
 
 
@@ -540,7 +690,9 @@ void Grid::step_trajectories(){
     }
 
     for(j=0; j<config_dimension; j++) coords_of_trajectory[j] = trajectories[i*config_dimension + j];
+
     step_trajectory_runge_kutta(coords_of_trajectory);
+
     for(j=0; j<config_dimension; j++) trajectories[i*config_dimension + j] = coords_of_trajectory[j];
 
 
@@ -640,7 +792,5 @@ void Grid::get_runge_kutta_velocity(double t, double *position_temp, double *vel
     }
   }
   for(i=0; i<config_dimension; i++) velocity_of_trajectory[i] = neighbor_vel[i];
-
-
   delete[] neighbor_coords, delete[] neighbor_vel, delete[] delta_n;
 }

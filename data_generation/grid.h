@@ -49,6 +49,9 @@ public:
 
 
 
+  void step_V();
+
+
   /**
       update the values after each step in the evolution
   */
@@ -83,6 +86,12 @@ private:
   void write_data();
 
 
+  /**
+      calculating the loop integral [int_0^2\pi  v \cdot dl] for a fixed radius and center, hardset in the function.
+  */
+  void calc_loop();
+  void get_loop_velocity(double *position, double *vel);
+
 
   /**
       Stepping the velocity by grabbing the velocity of the 'nearest neighbor' -- implementing a runge-kutta method soon
@@ -94,9 +103,10 @@ private:
 
 
 
-  int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, vel_function, rho_function, v_function, psi_function;
-  double *mass, *trajectories, time, time_step, total_time, coord_to_distance, point_offset, time_step_save, *k1, *k2, *k3, *k4;
+  int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, vel_function, rho_function, potential_function, psi_function, v_perturb;
+  double *mass, *trajectories, time, time_step, total_time, coord_to_distance, point_offset, time_step_save, *k1, *k2, *k3, *k4, loop;
   Point *points;
+  bool save, velocity_perturbation;
   std::string dir, write_folder;
 };
 
