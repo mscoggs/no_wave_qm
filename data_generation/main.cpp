@@ -21,7 +21,7 @@ main(int argc, char *argv[]){
 
   printf("\n...Initializing Grid...\n\n");
   grid.init_grid();
-  printf("\n...Evolving System...\n\n");
+  printf("\n...Evolving System...\n\n\n");
   grid.evolve();
   printf("\n...Done Evolving...\n\n");
   exit(0);

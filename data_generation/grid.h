@@ -103,10 +103,10 @@ private:
 
 
 
-  int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, vel_function, rho_function, potential_function, psi_function, v_perturb;
-  double *mass, *trajectories, time, time_step, total_time, coord_to_distance, point_offset, time_step_save, *k1, *k2, *k3, *k4, loop;
+  int spatial_dimension, num_particles, config_dimension, grid_length, total_points, degree_of_fit, num_trajectories, num_neighbors, num_loops, vel_function, rho_function, potential_function, psi_function, velocity_perturbation, density_perturbation;
+  double *mass, *trajectories, time, time_step, total_time, coord_to_distance, point_offset, time_step_save,v_perturb, *k1, *k2, *k3, *k4, *loop_vals, *loop_radii;
   Point *points;
-  bool save, velocity_perturbation;
+  bool save;
   std::string dir, write_folder;
 };
 

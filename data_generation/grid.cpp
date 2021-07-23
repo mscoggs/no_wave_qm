@@ -46,43 +46,24 @@ void Grid::init_grid(){
 void Grid::evolve(){
   int i = 0;
 
+  double total_steps = total_time/time_step;
   while(time < total_time){
     //print_evolution_info();
-    printf("Time = %5.3f.  ", time);
+    printf("Time = %5.3f ", time);
 
-    if(i > 1 && i%2==0){
-      printf("Evolving trajectories... ");
-
-      step_trajectories();
-
-    }
-    printf("Calculating Q... ");
+    if(i > 1 && i%2==0) step_trajectories();
     calc_Q();
-
-    printf("Calculating loop integral...  ");
     calc_loop();
 
+    if(save && (fmod(time+0.5*time_step, time_step_save) < time_step)) write_data();
 
-    //Keep this here?
-    if(save && (fmod(time+0.5*time_step, time_step_save) < time_step)){
-      printf("Writing data...  ");
-      write_data();
-    }
-
-    printf("Evolving rho...  ");
     step_rho();
-
-    printf("Evolving velocities...  ");
     step_velocities();
-
-    printf("Evolving V... ");
     step_V();
 
-    printf("Updating the grid and moving to the next step...  \n");
 
-
+    print_load_bar(i*1.0/total_steps);
     update_grid();
-
     time += time_step;
     i+=1;
 
@@ -351,7 +332,7 @@ void Grid::set_points(){
   total_points = int_pow(grid_length, config_dimension);
   points = new Point[total_points]();
   for(i = 0; i<total_points; i++){
-    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, potential_function, coord_to_distance, velocity_perturbation,  v_perturb);
+    points[i].init_point(config_dimension, mass, grid_length, num_particles, spatial_dimension, i, psi_function, potential_function, coord_to_distance, velocity_perturbation,  density_perturbation);
     print_load_bar(i*1.0/total_points);
   }
   calc_Q();
@@ -469,19 +450,37 @@ void Grid::get_data(){
         potential_function = stoi(line);
         continue;
       }
-
       if(line=="VELOCITY_PERTURBATION"){
         getline(input, line);
-        if(line == "True" || line == "TRUE" || line == "true") velocity_perturbation = true;
-        else if(line == "False" || line == "FALSE" || line == "false") velocity_perturbation = false;
-        else{
-          printf("\n\n Error reading velocity_perturbation in input.txt, quitting");
-          exit(0);
-        }
+        velocity_perturbation = stoi(line);
+        continue;
       }
-      if(line=="VELOCITY_PERTURBATION_VALUE"){
+      if(line=="DENSITY_PERTURBATION"){
         getline(input, line);
-        v_perturb = stoi(line);
+        density_perturbation = stoi(line);
+        continue;
+      }
+
+      if(line=="NUMBER_OF_LOOP_RADII"){
+        getline(input, line);
+        num_loops = stoi(line);
+        continue;
+      }
+      if(line=="LOOP_RADII"){
+        getline(input, line);
+        loop_radii = new double[num_loops]();
+        loop_vals = new double[num_loops]();
+        std::stringstream ss(line);
+        for(i=0; i<num_loops; i++){
+            pos = line.find(delimiter);
+            token = line.substr(0, pos);
+            loop_radii[i] = stod(token);
+
+            if(loop_radii[i] >= (grid_length-1.0)/2.0){
+              printf("\n\nERROR: LOOP RADII %i TOO LARGE. MUST BE LESS THAN (grid_length-1.0)/2.0, EXITING\n\n", i+1);
+            }
+            line.erase(0, pos + delimiter.length());
+        }
         continue;
       }
       if(line=="SAVE"){
@@ -541,14 +540,16 @@ void Grid::write_data(){
     dest << src.rdbuf();
     file.open(dir + "/" + file_name_trajectories);
     file << "time    ";
-    for(i = 0; i<num_trajectories; i++) file << "position" <<  i << "   ";
+    for(i = 0; i<num_trajectories; i++) file << "position_" <<  i << "   ";
     file << "\n";
     file.close();
 
-    file.open(dir + "/" + file_name_loops);
-    file << "time     loop_value       loop_value*mass/pi*h_bar     \n";
-    file.close();
 
+    file.open(dir + "/" + file_name_loops);
+    file << "time    ";
+    for(i = 0; i<num_loops; i++) file << " loop_value_" << i << "    n_"<< i << "  "; //loop_value*mass/pi*h_bar = n
+    file << "\n";
+    file.close();
   }
 
   //writing the evolution information for every point to a single file
@@ -577,9 +578,10 @@ void Grid::write_data(){
   file << "\n";
   file.close();
 
-
   file.open(dir + "/" + file_name_loops, std::ios::app);
-  file << time << "  " <<  std::to_string(loop) << "  " <<  std::to_string(loop*MASS_OVER_HBAR/(2*PI)) << "   \n";
+  file << time << "  ";
+  for(i = 0; i<num_loops; i++) file <<  std::to_string(loop_vals[i]) << "  " <<  std::to_string(loop_vals[i]*MASS_OVER_HBAR/(2*PI)) << "   ";
+  file << "\n";
   file.close();
 
 
@@ -587,39 +589,39 @@ void Grid::write_data(){
 
 
 void Grid::calc_loop(){
-  double x_mid = (grid_length-1.0)/2.0, y_mid = (grid_length-1.0)/2.0;
-  double loop_radius = 7;
 
-  if(loop_radius*2-1 >= grid_length){
-    printf("loop radius is too big for this grid length, skipping loop integral");
-    return;
-  }
   if(config_dimension != 2){
     printf("calc_loop is only meant for 2D, skipping\n");
     return;
   }
-  double *position, *vel;
+
+  int i;
+  double x_mid = (grid_length-1.0)/2.0, y_mid = (grid_length-1.0)/2.0;
+  double theta, r, d0_step = THETA_STEP_SIZE_CALC_LOOP, sum, vel_mag, *position, *vel, d0_remainder;
+
   position = new double[config_dimension]();
   vel = new double[config_dimension]();
-  double theta = 0;
-  double r = loop_radius;
-  double d0_step = 0.001;
-  double sum = 0;
 
-  for(theta =0; theta<2*PI; theta += d0_step){ //Assuming 2D, but can be modified for more dimensions
+
+  for(i = 0; i<num_loops; i++){
+    sum = 0, r = loop_radii[i];
+
+    for(theta =0; theta<2*PI-d0_step; theta += d0_step){ //Assuming 2D, but can be modified for more dimensions
+      position[0] = x_mid + r*cos(theta);
+      position[1] = y_mid + r*sin(theta);
+      get_loop_velocity(position, vel);
+      vel_mag = sqrt(vel[0]*vel[0]+vel[1]*vel[1]);
+      sum += d0_step*r*(cos(theta)*vel[1] - sin(theta)*vel[0]);
+    }
+    d0_remainder = 2*PI-theta;
     position[0] = x_mid + r*cos(theta);
     position[1] = y_mid + r*sin(theta);
-
     get_loop_velocity(position, vel);
-    double vel_mag = sqrt(vel[0]*vel[0]+vel[1]*vel[1]);
-    // printf("This should be an int: %f\n\n",loop_radius*vel_mag*MASS_OVER_HBAR);
-    // printf("vel_mag: %f\n\n",vel_mag);
-    // printf("1/(loop_radius*MASS_OVER_HBAR): %f\n\n",1/(loop_radius*MASS_OVER_HBAR));
-    // printf("vel0, vel1 %f, %f\n", vel[0], vel[1]);
-    sum += d0_step*r*(cos(theta)*vel[1] - sin(theta)*vel[0]);
+    vel_mag = sqrt(vel[0]*vel[0]+vel[1]*vel[1]);
+    sum += d0_remainder*r*(cos(theta)*vel[1] - sin(theta)*vel[0]);
+
+    loop_vals[i] = sum;
   }
-  loop = sum;
-  // printf("loop: %f\n",loop );
   delete[] position, delete[] vel;
 }
 

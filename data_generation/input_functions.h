@@ -10,7 +10,7 @@ struct Psi
 
 Psi calc_psi(double x, double y, int psi_function,double coord_to_distance, double *mass, bool velocity_perturbation, double v_perturb);
 
-double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function, double coord_to_distance, bool velocity_perturbation, double v_perturb);
+double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function, double coord_to_distance, int velocity_perturbation, int density_perturbation);
 /**
     calculating the potential function
 

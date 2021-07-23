@@ -9,7 +9,7 @@
 
 
 
-void Point::init_point(int config_dimension, double *mass, int grid_length, int num_particles, int spatial_dimension, int index, int psi_function, int potential_function, double coord_to_distance, bool velocity_perturbation, double v_perturb){
+void Point::init_point(int config_dimension, double *mass, int grid_length, int num_particles, int spatial_dimension, int index, int psi_function, int potential_function, double coord_to_distance, int velocity_perturbation, int density_perturbation){
   int i, remainder;
 
   double time = 0;
@@ -19,7 +19,7 @@ void Point::init_point(int config_dimension, double *mass, int grid_length, int 
   velocities_oldest = new double[config_dimension]();
   index_to_coordinates(coordinates, index,config_dimension, grid_length);
 
-  rho = calc_rho_vel_initial(coordinates, velocities, config_dimension, grid_length, mass,psi_function, coord_to_distance, velocity_perturbation, v_perturb);
+  rho = calc_rho_vel_initial(coordinates, velocities, config_dimension, grid_length, mass,psi_function, coord_to_distance, velocity_perturbation, density_perturbation);
   memcpy(velocities_old, velocities, sizeof(double)*config_dimension);
   memcpy(velocities_oldest, velocities, sizeof(double)*config_dimension);
   V = calc_potential(time, coordinates, num_particles, spatial_dimension, potential_function, grid_length, mass);

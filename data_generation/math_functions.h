@@ -23,6 +23,8 @@ double const A0 = 4*PI*PERM*H_BAR_SQUARED/(ME*E*E);
 double const B1 = 4*Z*ME*E*E/H_BAR_SQUARED;
 double const B2 = B1/3;
 double const LAMBDA = 0.01;
+double const EPSILON_INIT_CALCS = pow(5, -5);
+double const THETA_STEP_SIZE_CALC_LOOP = 0.001;
 double const MASS_OVER_HBAR = (9.109/1.0545)*pow(10,3);
 
 struct complex {
