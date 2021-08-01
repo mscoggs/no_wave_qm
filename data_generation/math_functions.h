@@ -148,6 +148,7 @@ void print_double_array(double *array, int size);
     @param x the point to evaluate at
 */
 double j_1(double x, int grid_length);
+double get_random_double(double lower_bound, double upper_bound);
 
 double j_n(double x, int n);
 double j_n_non_int(double x, double n);

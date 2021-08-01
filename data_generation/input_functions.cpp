@@ -89,7 +89,7 @@ double calc_potential(double time, int *coordinates, int num_particles, int spat
 
 double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dimension, int grid_length, double *mass, int psi_function, double coord_to_distance, int velocity_perturbation, int density_perturbation){
   int a = psi_function;
-  double x, y, center = (grid_length-1.0)/2.0, A,epsilon = EPSILON_INIT_CALCS, d0,d1, rho_pert = 0, *x3,*y3, *abc;
+  double x, y, center = (grid_length-1.0)/2.0, A,epsilon = EPSILON_INIT_CALCS, d0,d1, rho_pert = 0, rho_scale=1, *x3,*y3, *abc;
 
 
   x3   = new double[3]();
@@ -123,7 +123,7 @@ double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dime
 
   switch(velocity_perturbation){
     case 0:
-      break
+      break;
     case 1:
       velocities[0] += -0.01*H_BAR*y/(mass[0]*(x*x+y*y));
       velocities[1] += 0.01*H_BAR*x/(mass[0]*(x*x+y*y));
@@ -133,10 +133,14 @@ double calc_rho_vel_initial(int *coordinates,double *velocities, int config_dime
   switch(density_perturbation){
     case 0:
       break;
-    case 1;
+    case 1:
       rho_pert = 0;
+      break;
+    case 2:
+      rho_scale = get_random_double(0.8, 1.2);
+      break;
   }
 
   delete[] x3, delete[] y3, delete[] abc;
-  return pow(psi.real,2)+pow(psi.imaginary,2) + rho_pert;
+  return rho_scale*pow(psi.real,2)+pow(psi.imaginary,2) + rho_pert;
 }

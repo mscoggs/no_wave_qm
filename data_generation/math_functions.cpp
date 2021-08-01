@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string.h>
 #include <cstring>
+#include <random>
 
 
 #include "math_functions.h"
@@ -353,7 +354,12 @@ int factorial(int n){
   return total;
 }
 
-
+double get_random_double(double lower_bound, double upper_bound){
+  std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
+  std::default_random_engine re;
+  double a_random_double = unif(re);
+  return a_random_double;
+}
 
 double get_theta(double x, double y){
   double r = sqrt(x*x+y*y);
