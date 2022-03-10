@@ -34,4 +34,4 @@ then follow the markdown in the notebook
 
 
 
-# paper (in prep)
+# Paper (in prep)
