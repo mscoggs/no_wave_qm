@@ -1,4 +1,4 @@
-# no_wave_qm
+# Hamilton-Jacobi No-Wave Quantum Simulator
 Simulating the evolution according to a hamilton-jacobi formulation of QM which replaces the wave with a configuration space density and equations of motion. Trajectory tracking using a 4-th order Runge Kutta technique.
 
 
