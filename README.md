@@ -34,4 +34,26 @@ then follow the markdown in the notebook
 
 
 
-# Paper (in prep)
+# Paper 
+```
+@ARTICLE{2023arXiv230304959R,
+       author = {{Roser}, Philipp and {Scoggins}, Matthew T.},
+        title = "{Non-Quantum Behaviors of Configuration-Space Density Formulations of quantum mechanics}",
+      journal = {arXiv e-prints},
+     keywords = {Quantum Physics},
+         year = 2023,
+        month = mar,
+          eid = {arXiv:2303.04959},
+        pages = {arXiv:2303.04959},
+          doi = {10.48550/arXiv.2303.04959},
+archivePrefix = {arXiv},
+       eprint = {2303.04959},
+ primaryClass = {quant-ph},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2023arXiv230304959R},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
+
+
+
+
